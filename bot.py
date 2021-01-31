@@ -6,21 +6,14 @@ Author: liuhh02 https://medium.com/@liuhh02
 import os
 import logging
 import gspread
-import oauth2client
-import endpoints
 import sys
-import webob
-import pandas as pd
-import numpy as np
-import requests
 
 from oauth2client.service_account import ServiceAccountCredentials
-from telegram.ext import Updater, CommandHandler, MessageHandler,    Filters, InlineQueryHandler, Job, JobQueue,MessageHandler
+from telegram.ext import Updater, CommandHandler
 from dotenv import load_dotenv
 from datetime import datetime, time, date, timedelta
 from calendar import monthrange
 from dbhelper import DBHelper
-from time import gmtime, strftime
 
 load_dotenv()
 
@@ -101,11 +94,13 @@ def start(update, context):
 start_handler = CommandHandler('start', start)
 dispatcher.add_handler(start_handler)
 
-# updater.start_polling()
-updater.start_webhook(listen="0.0.0.0",
-                          port=int(PORT),
-                          url_path=TOKEN)
-updater.bot.setWebhook('https://stark-stream-60602.herokuapp.com/' + TOKEN)
+if 'ON_HEROKU' in os.environ:
+    updater.start_webhook(listen="0.0.0.0",
+                            port=PORT,
+                            url_path=TOKEN)
+    updater.bot.setWebhook('https://stark-stream-60602.herokuapp.com/' + TOKEN)
+else:
+    updater.start_polling()
 
 updater.idle()
 
