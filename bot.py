@@ -26,7 +26,7 @@ scope = [
 ]
 creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
 gc = gspread.authorize(creds)
-worksheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1ozuBggiT-rBfnzP3zr6ubLOE2TtI1gY6nNtBUWbYLcE/edit#gid=1478484939')
+worksheet = gc.open_by_URL('https://docs.google.com/spreadsheets/d/1ozuBggiT-rBfnzP3zr6ubLOE2TtI1gY6nNtBUWbYLcE/edit#gid=1478484939')
 sheet = worksheet.worksheet(date.strftime(date.today(), '%B %Y'))
 
 sheet_data = sheet.get_all_values()
