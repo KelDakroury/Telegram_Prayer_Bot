@@ -27,7 +27,7 @@ scope = [
 creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
 gc = gspread.authorize(creds)
 worksheet = gc.open_by_key('1ozuBggiT-rBfnzP3zr6ubLOE2TtI1gY6nNtBUWbYLcE')
-sheet = worksheet.worksheet(date.strftime(date.today(), 'February 2021'))
+sheet = worksheet.worksheet(date.strftime(date.today(), '%B %Y'))
 
 sheet_data = sheet.get_all_values()
 prayer_names = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
