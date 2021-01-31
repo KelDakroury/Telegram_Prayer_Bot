@@ -11,7 +11,7 @@ import sys
 from oauth2client.service_account import ServiceAccountCredentials
 from telegram.ext import Updater, CommandHandler
 from dotenv import load_dotenv
-from datetime import datetime, time, date, timedelta
+from datetime import datetime, time, date, timedelta, timezone
 from calendar import monthrange
 from dbhelper import DBHelper
 
@@ -46,7 +46,7 @@ TOKEN = os.getenv('BOT_TOKEN')
 updater = Updater(token=TOKEN, use_context=True)
 dispatcher = updater.dispatcher
 j = updater.job_queue
-moscow = timedelta(hours=3)
+moscow = timezone(timedelta(hours=3))
 
 def get_month_times():
     now = date.today()
