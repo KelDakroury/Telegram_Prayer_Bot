@@ -50,7 +50,7 @@ def get_month_times():
     sheet = worksheet.worksheet(date.strftime(now, '%B %Y'))
     days = monthrange(now.year, now.month)[1]
     columns = ['C', 'F', 'H', 'J', 'K']
-    ranges = [f'{c}4:{c}{4+days-1}' for c in columns]
+    ranges = [f'{c}4:{ c}{4+days-1}' for c in columns]
     fajr, dohr, asr, maghrib, isha = [
         [cell[0] for cell in row]
         for row in sheet.batch_get(ranges)
@@ -62,7 +62,7 @@ def remind_next_prayer(context):
     prayer_name = context.job.context['prayer_name']
     chat_id = context.job.context['uid']
     context.bot.send_message(chat_id=chat_id,
-                             text=f"Time of {prayer_name} prayer is NOW!")
+                             text=f"{prayer_name} prayer is NOW!")
 
 
 def register_todays_prayers(context):
@@ -83,7 +83,7 @@ def start(update, context):
     new_id = update.effective_chat.id
     db.add_id(new_id)
     context.bot.send_message(chat_id=new_id,
-                             text="Prayer Times bot")
+                             text="Prayer Times bot start")
     # now = datetime.now()
     j.run_once(register_todays_prayers, 5, context={'uid': new_id})
     j.run_daily(register_todays_prayers, time(hour=0), context={'uid': new_id})
