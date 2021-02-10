@@ -58,7 +58,7 @@ def get_month_times():
     return fajr, dohr, asr, maghrib, isha
 
 
-def remind_current_prayer(context):
+def remind_next_prayer(context):
     prayer_name = context.job.context['prayer_name']
     chat_id = context.job.context['uid']
     context.bot.send_message(chat_id=chat_id,
