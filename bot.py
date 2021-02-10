@@ -8,6 +8,7 @@ import logging
 import gspread
 import sys
 
+
 from oauth2client.service_account import ServiceAccountCredentials
 from telegram.ext import Updater, CommandHandler
 from dotenv import load_dotenv
@@ -16,7 +17,6 @@ from calendar import monthrange
 from dbhelper import DBHelper
 
 load_dotenv()
-
 # parsing data first!!, into a 2D array
 scope = [
     "https://spreadsheets.google.com/feeds",
@@ -58,7 +58,7 @@ def get_month_times():
     return fajr, dohr, asr, maghrib, isha
 
 
-def remind_next_prayer(context):
+def remind_current_prayer(context):
     prayer_name = context.job.context['prayer_name']
     chat_id = context.job.context['uid']
     context.bot.send_message(chat_id=chat_id,
@@ -68,16 +68,19 @@ def remind_next_prayer(context):
 def register_todays_prayers(context):
     logging.info('Registering today\'s prayers')
     prayer_times = get_month_times()
+    """for job in j.jobs:
+        job.schedule_removal()"""
     for prayer in range(5):
         prayer_time = prayer_times[prayer][datetime.now().day - 1]
         timestamp = [int(x) for x in prayer_time.split(':')]
         timestamp = time(*timestamp, tzinfo=moscow)
         logging.info(f'Registered callback for {prayer_names[prayer]} registered at {timestamp}')
+        context.bot.send_message(chat_id=chat_id,
+                                 text = " {prayer_names[prayer]} registered at {timestamp} today!")
         j.run_once(remind_next_prayer, timestamp, context={
             'uid': context.job.context['uid'], 
             'prayer_name': prayer_names[prayer],
         })
-
 
 def start(update, context):
     new_id = update.effective_chat.id
