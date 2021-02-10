@@ -75,8 +75,6 @@ def register_todays_prayers(context):
         timestamp = [int(x) for x in prayer_time.split(':')]
         timestamp = time(*timestamp, tzinfo=moscow)
         logging.info(f'Registered callback for {prayer_names[prayer]} registered at {timestamp}')
-        context.bot.send_message(chat_id=chat_id,
-                                 text = " {prayer_names[prayer]} registered at {timestamp} today!")
         j.run_once(remind_next_prayer, timestamp, context={
             'uid': context.job.context['uid'], 
             'prayer_name': prayer_names[prayer],
