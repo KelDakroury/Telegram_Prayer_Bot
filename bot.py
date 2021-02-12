@@ -16,6 +16,7 @@ from datetime import datetime, time, date, timedelta, timezone
 from calendar import monthrange
 from dbhelper import DBHelper
 
+
 load_dotenv()
 # parsing data first!!, into a 2D array
 scope = [
@@ -68,8 +69,8 @@ def remind_next_prayer(context):
 def register_todays_prayers(context):
     logging.info('Registering today\'s prayers')
     prayer_times = get_month_times()
-    """for job in j.jobs:
-        job.schedule_removal()"""
+    for job in j.jobs:
+        job.schedule_removal()
     for prayer in range(5):
         prayer_time = prayer_times[prayer][datetime.now().day - 1]
         timestamp = [int(x) for x in prayer_time.split(':')]
