@@ -97,10 +97,10 @@ def start(update: Update, context: CallbackContext):
     new_id = update.effective_chat.id
     context.chat_data['id'] = new_id
     user = db.get_user(new_id)
-    # if user is not None and user.active:
-    #     context.bot.send_message(chat_id=new_id,
-    #                              text="The bot is already activated.""")
-    #     return
+    if user is not None and user.active:
+        context.bot.send_message(chat_id=new_id,
+                                 text="The bot is already activated.""")
+        return
 
     db.add_user(new_id)
 
