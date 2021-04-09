@@ -50,6 +50,8 @@ class DBHelper:
         args = (user_id,)
         cur.execute(stmt, args)
         user = cur.fetchone()
+        if user is None:
+            return None
         cur.close()
         return User(user[0], user[1])
 
