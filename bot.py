@@ -148,7 +148,7 @@ if 'ON_HEROKU' in os.environ:
     updater.start_webhook(listen="0.0.0.0",
                             port=port,
                             url_path=TOKEN)
-    updater.bot.setWebhook('https://stark-stream-60602.herokuapp.com/' + TOKEN)
+    updater.bot.setWebhook('https://innoprayerbot.herokuapp.com/' + TOKEN)
 else:
     updater.start_polling()
 
