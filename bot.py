@@ -118,12 +118,11 @@ def stop(update: Update, context: CallbackContext):
     uid = update.effective_chat.id
     user = db.get_user(uid)
 
-    for job in j.jobs():
-        print(job)
+    # for job in j.jobs():
+    #     print(job)
 
     context.bot.send_message(chat_id=uid,
-                             text="Sorry. Not yet implemented :(""",
-                             parse_mode=ParseMode.MARKDOWN_V2)
+                             text="Sorry. Not yet implemented :(")
 
 
 start_handler = CommandHandler('start', start)
