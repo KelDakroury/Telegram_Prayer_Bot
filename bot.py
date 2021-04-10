@@ -105,7 +105,7 @@ def start(update: Update, context: CallbackContext):
     db.add_user(new_id)
 
     # now = datetime.now()
-    job = j.run_daily(register_todays_prayers, time(hour=0), context={
+    job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': new_id,
     })
     job.run(dispatcher) # Run just once (for today)
@@ -136,7 +136,7 @@ dispatcher.add_handler(stop_handler)
 
 users = db.list_users()
 for user in users:
-    job = j.run_daily(register_todays_prayers, time(hour=0), context={
+    job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': user.id,
     })
     job.run(dispatcher) # Run just once (for today)
