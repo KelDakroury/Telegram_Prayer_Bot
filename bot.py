@@ -11,7 +11,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from telegram import Update, ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from dotenv import load_dotenv
-from datetime import datetime, time, date, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 from calendar import monthrange
 from dbhelper import DBHelper
 
@@ -45,8 +45,8 @@ moscow = timezone(timedelta(hours=3))
 
 def get_month_times():
     '''Fetches today's prayer times and returns them as a list of 5 elements.'''
-    now = date.today()
-    sheet = worksheet.worksheet(date.strftime(now, '%B %Y'))
+    now =  datetime.now(moscow)
+    sheet = worksheet.worksheet(now.strftime('%B %Y'))
     days = monthrange(now.year, now.month)[1]
     columns = ['C', 'F', 'H', 'J', 'K']
     ranges = [f'{c}4:{c}{4+days-1}' for c in columns]
@@ -70,7 +70,7 @@ def register_todays_prayers(context: CallbackContext):
     uid = context.job.context['chat_id']
     logging.info(f'Registering today\'s prayers for {uid}')
     prayer_times = get_month_times()
-    today = datetime.now().day - 1
+    today = datetime.now(moscow).day - 1
     for name, prayer_time in zip(prayer_names, prayer_times):
         prayer_time = prayer_time[today]
         timestamp = [int(x) for x in prayer_time.split(':')]
@@ -86,7 +86,7 @@ def register_todays_prayers(context: CallbackContext):
 
 def send_todays_times(update: Update, context: CallbackContext):
     times = get_month_times()
-    today = datetime.now().day - 1
+    today = datetime.now(moscow).day - 1
     prayers = [f"*{name}*: {time[today]}" for name, time in zip(prayer_names, times)]
     prayers_list = '\n'.join(prayers)
     context.bot.send_message(chat_id=update.effective_chat.id,
@@ -104,7 +104,6 @@ def start(update: Update, context: CallbackContext):
 
     db.add_user(new_id)
 
-    # now = datetime.now()
     job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': new_id,
     })
