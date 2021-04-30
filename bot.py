@@ -25,7 +25,7 @@ scopes = [
 ]
 creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scopes)
 gc = gspread.authorize(creds)
-worksheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1ozuBggiT-rBfnzP3zr6ubLOE2TtI1gY6nNtBUWbYLcE/edit#gid=1478484939')
+worksheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1box4YoEMuMTrsZREKvo1bqObxNzQBCuOR1Lnvam8UE4/edit#gid=1360988489')
 
 prayer_names = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
