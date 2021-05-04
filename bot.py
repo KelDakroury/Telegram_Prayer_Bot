@@ -62,7 +62,7 @@ def remind_next_prayer(context: CallbackContext):
     prayer_name = context.job.context['prayer_name']
     chat_id = context.job.context['chat_id']
     context.bot.send_message(chat_id=chat_id,
-                             text=f" {prayer_name}was at 23:45!")
+                             text=f"It's time for {prayer_name}!")
 
 
 def register_todays_prayers(context: CallbackContext):
