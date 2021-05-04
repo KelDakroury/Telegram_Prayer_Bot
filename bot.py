@@ -27,7 +27,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', s
 gc = gspread.authorize(creds)
 worksheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1box4YoEMuMTrsZREKvo1bqObxNzQBCuOR1Lnvam8UE4/edit?usp=sharing')
 
-prayer_names = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha','Fajr-p']
+prayer_names = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha','Fajrp']
 
 # Preparing for the database to store the  userids
 db = DBHelper()
