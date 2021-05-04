@@ -27,7 +27,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', s
 gc = gspread.authorize(creds)
 worksheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1box4YoEMuMTrsZREKvo1bqObxNzQBCuOR1Lnvam8UE4/edit?usp=sharing')
 
-prayer_names = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+prayer_names = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha','Fajr-p']
 
 # Preparing for the database to store the  userids
 db = DBHelper()
@@ -48,7 +48,7 @@ def get_month_times():
     now =  datetime.now(moscow)
     sheet = worksheet.worksheet(now.strftime('%B %Y'))
     days = monthrange(now.year, now.month)[1]
-    columns = ['C', 'F', 'H', 'J', 'K']
+    columns = ['C', 'F', 'H', 'J', 'K','M']
     ranges = [f'{c}4:{c}{4+days-1}' for c in columns]
     prayers = [
         [cell[0] for cell in row]
