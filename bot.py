@@ -4,28 +4,18 @@ reference:
 """
 import os
 import logging
-import gspread
-import sys
-
-from oauth2client.service_account import ServiceAccountCredentials
 from telegram import Update, ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from dotenv import load_dotenv
 from datetime import datetime, time, timedelta, timezone
-from calendar import monthrange
 from dbhelper import DBHelper
 
+import requests
+from bs4 import BeautifulSoup
+import numpy as np
 
 load_dotenv()
-scopes = [
-    "https://spreadsheets.google.com/feeds",
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/drive"
-]
-creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scopes)
-gc = gspread.authorize(creds)
-worksheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1box4YoEMuMTrsZREKvo1bqObxNzQBCuOR1Lnvam8UE4/edit?usp=sharing')
+
 
 prayer_names = ['Fajr', 'Sunrise' , 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
@@ -44,17 +34,18 @@ j = updater.job_queue
 moscow = timezone(timedelta(hours=3))
 
 def get_month_times():
-    '''Fetches today's prayer times and returns them as a list of 5 elements.'''
-    now =  datetime.now(moscow)
-    sheet = worksheet.worksheet(now.strftime('%B %Y'))
-    days = monthrange(now.year, now.month)[1]
-    columns = ['C', 'E' ,'F', 'H', 'J', 'K']
-    ranges = [f'{c}4:{c}{4+days-1}' for c in columns]
-    prayers = [
-        [cell[0] for cell in row]
-        for row in sheet.batch_get(ranges)
-    ]
-    return prayers
+    '''Fetches the table of prayer times for the current month from halalguide website'''
+    url = "https://en.halalguide.me/innopolis/namaz-time"
+    res = requests.get(url)
+    html = res.content
+    soup = BeautifulSoup(html, 'html.parser')
+    table = soup.find('table')
+
+    prayers = []
+    for row in table.find_all("tr")[1:]:
+        prayers.append([tr.get_text() for tr in row.find_all("td")][3:])
+
+    return np.array(prayers).T.tolist()
 
 
 def remind_next_prayer(context: CallbackContext):
