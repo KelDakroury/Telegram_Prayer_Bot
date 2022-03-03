@@ -36,7 +36,7 @@ moscow = timezone(timedelta(hours=3))
 def get_month_times():
     '''Fetches the table of prayer times for the current month from halalguide website'''
     url = "https://en.halalguide.me/innopolis/namaz-time"
-    res = requests.get(url)
+    res = requests.get(url, verify=False)
     html = res.content
     soup = BeautifulSoup(html, 'html.parser')
     table = soup.find('table')
