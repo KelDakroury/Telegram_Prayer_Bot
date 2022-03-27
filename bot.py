@@ -33,8 +33,17 @@ j = updater.job_queue
 
 moscow = timezone(timedelta(hours=3))
 
+
+def shift_time(time, delta):
+    """Manually advance or delay time by delta"""
+    time = datetime(2000, 1, 1, int(time[:2]), int(time[3:]))
+    time += delta
+    time = time.time()
+    return f"{time.hour:02}:{time.minute:02}"
+
+
 def get_month_times():
-    '''Fetches the table of prayer times for the current month from halalguide website'''
+    """Fetches the table of prayer times for the current month from halalguide website"""
     url = "https://en.halalguide.me/innopolis/namaz-time"
     res = requests.get(url, verify=False)
     html = res.content
@@ -43,13 +52,16 @@ def get_month_times():
 
     prayers = []
     for row in table.find_all("tr")[1:]:
-        prayers.append([tr.get_text() for tr in row.find_all("td")][3:])
+        tmp = [tr.get_text() for tr in row.find_all("td")][3:]
+        tmp[0] = shift_time(tmp[0], timedelta(minutes=-2))  # earlier fajr
+        tmp[4] = shift_time(tmp[4], timedelta(minutes=2))   # later maghrib
+        prayers.append(tmp)
 
     return np.array(prayers).T.tolist()
 
 
 def remind_next_prayer(context: CallbackContext):
-    '''Sends a message reminding about the prayer.'''
+    """Sends a message reminding about the prayer."""
     prayer_name = context.job.context['prayer_name']
     chat_id = context.job.context['chat_id']
     context.bot.send_message(chat_id=chat_id,
@@ -57,7 +69,7 @@ def remind_next_prayer(context: CallbackContext):
 
 
 def register_todays_prayers(context: CallbackContext):
-    '''Registers callbacks for all of today's prayers.'''
+    """Registers callbacks for all of today's prayers."""
     uid = context.job.context['chat_id']
     logging.info(f'Registering today\'s prayers for {uid}')
     prayer_times = get_month_times()
