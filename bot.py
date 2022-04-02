@@ -36,7 +36,7 @@ j = updater.job_queue
 moscow = timezone(timedelta(hours=3))
 
 
-def shift_time(time, delta):
+def shift_time(time, delta: timedelta):
     """Manually advance or delay time by delta"""
     time = datetime(2000, 1, 1, int(time[:2]), int(time[3:]))
     time += delta
@@ -44,7 +44,7 @@ def shift_time(time, delta):
     return f"{time.hour:02}:{time.minute:02}"
 
 
-def get_month_times():
+def get_month_times() -> list[list[str]]:
     """Fetches the table of prayer times for the current month from halalguide website"""
     url = "https://en.halalguide.me/innopolis/namaz-time"
     res = requests.get(url, verify=False)
