@@ -96,6 +96,15 @@ def send_todays_times(update: Update, context: CallbackContext):
                              text=f"Today's prayer times:\n{prayers_list}",
                              parse_mode=ParseMode.MARKDOWN_V2)
 
+def send_tomorrows_times(update: Update, context: CallbackContext):
+    times = get_month_times()
+    tomorrow = datetime.now(moscow).day
+    prayers = [f"*{name}*: {time[tomorrow]}" for name, time in zip(prayer_names, times)]
+    prayers_list = '\n'.join(prayers)
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text=f"Today's prayer times:\n{prayers_list}",
+                             parse_mode=ParseMode.MARKDOWN_V2)
+
 def start(update: Update, context: CallbackContext):
     new_id = update.effective_chat.id
     context.chat_data['id'] = new_id
@@ -132,6 +141,9 @@ dispatcher.add_handler(start_handler)
 
 today_handler = CommandHandler('today', send_todays_times)
 dispatcher.add_handler(today_handler)
+
+tomorrow_handler = CommandHandler('tomorrow', send_tomorrows_times)
+dispatcher.add_handler(tomorrow_handler)
 
 stop_handler = CommandHandler('stop', stop)
 dispatcher.add_handler(stop_handler)
