@@ -133,7 +133,7 @@ def send_next_prayer(update: Update, context: CallbackContext):
         requested_prayer = command[1]
         if requested_prayer not in prayer_names:
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                    text="Unkown value for prayer time.\n"
+                                    text="Unkown value for prayer time\n"
                                         f"Available values are: {', '.join(prayer_names)}",
                                     parse_mode=ParseMode.MARKDOWN_V2)
             return
@@ -151,12 +151,12 @@ def send_next_prayer(update: Update, context: CallbackContext):
     if prayer_time is None:
         requested_prayer = 'prayer' if requested_prayer is None else requested_prayer
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                text=f"Sorry, cannot find the next {requested_prayer} time.\n"
-                                      "Cannot cross the month boundary (yet).",
+                                text=f"Sorry, cannot find the next {requested_prayer} time\n"
+                                      "Cannot cross the month boundary (yet)",
                                 parse_mode=ParseMode.MARKDOWN_V2)
         return
     context.bot.send_message(chat_id=update.effective_chat.id,
-                            text=f"The next {requested_prayer} in {precisedelta(prayer_time - now)}"
+                            text=f"The next {requested_prayer} is in {precisedelta(prayer_time - now)}"
                                  f" \\(at {prayer_time.strftime('%H:%M')}\\)",
                             parse_mode=ParseMode.MARKDOWN_V2)
 
