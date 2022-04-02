@@ -113,7 +113,7 @@ def send_tomorrows_times(update: Update, context: CallbackContext):
     prayers = [f"*{name}*: {time[tomorrow]}" for name, time in zip(prayer_names, times)]
     prayers_list = '\n'.join(prayers)
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text=f"Today's prayer times:\n{prayers_list}",
+                             text=f"Tomorrow's prayer times:\n{prayers_list}",
                              parse_mode=ParseMode.MARKDOWN_V2)
 
 def send_next_prayer(update: Update, context: CallbackContext):
