@@ -157,7 +157,7 @@ def send_next_prayer(update: Update, context: CallbackContext):
         return
     context.bot.send_message(chat_id=update.effective_chat.id,
                             text=f"The next {requested_prayer} in {precisedelta(prayer_time - now)}"
-                                 f" (at {prayer_time.strftime('%H:%M')})",
+                                 f" \\(at {prayer_time.strftime('%H:%M')}\\)",
                             parse_mode=ParseMode.MARKDOWN_V2)
 
 def start(update: Update, context: CallbackContext):
