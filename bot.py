@@ -4,18 +4,20 @@ reference:
 """
 import os
 import logging
+from datetime import datetime, time, timedelta, timezone
+from calendar import monthrange
+
 from telegram import Update, ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from dotenv import load_dotenv
-from datetime import datetime, time, timedelta, timezone
-from dbhelper import DBHelper
-
 import requests
 from bs4 import BeautifulSoup
 import numpy as np
 
-load_dotenv()
+from dbhelper import DBHelper
 
+
+load_dotenv()
 
 prayer_names = ['Fajr', 'Sunrise' , 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
@@ -96,6 +98,23 @@ def send_todays_times(update: Update, context: CallbackContext):
                              text=f"Today's prayer times:\n{prayers_list}",
                              parse_mode=ParseMode.MARKDOWN_V2)
 
+def send_tomorrows_times(update: Update, context: CallbackContext):
+    times = get_month_times()
+    now = datetime.now(moscow)
+    _, days_in_month = monthrange(now.year, now.month)
+    tomorrow = now.day
+    if tomorrow >= days_in_month:
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                text="Sorry, this feature doesn't work"
+                                     " on the last day of the month yet :(",
+                                parse_mode=ParseMode.MARKDOWN_V2)
+        return
+    prayers = [f"*{name}*: {time[tomorrow]}" for name, time in zip(prayer_names, times)]
+    prayers_list = '\n'.join(prayers)
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text=f"Today's prayer times:\n{prayers_list}",
+                             parse_mode=ParseMode.MARKDOWN_V2)
+
 def start(update: Update, context: CallbackContext):
     new_id = update.effective_chat.id
     context.chat_data['id'] = new_id
@@ -132,6 +151,9 @@ dispatcher.add_handler(start_handler)
 
 today_handler = CommandHandler('today', send_todays_times)
 dispatcher.add_handler(today_handler)
+
+tomorrow_handler = CommandHandler('tomorrow', send_tomorrows_times)
+dispatcher.add_handler(tomorrow_handler)
 
 stop_handler = CommandHandler('stop', stop)
 dispatcher.add_handler(stop_handler)
