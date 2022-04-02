@@ -200,6 +200,9 @@ dispatcher.add_handler(today_handler)
 tomorrow_handler = CommandHandler('tomorrow', send_tomorrows_times)
 dispatcher.add_handler(tomorrow_handler)
 
+next_handler = CommandHandler('next', send_next_prayer)
+dispatcher.add_handler(next_handler)
+
 stop_handler = CommandHandler('stop', stop)
 dispatcher.add_handler(stop_handler)
 
