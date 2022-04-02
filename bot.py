@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import requests
 from bs4 import BeautifulSoup
 import numpy as np
+from humanize import precisedelta
 
 from dbhelper import DBHelper
 
@@ -36,7 +37,7 @@ j = updater.job_queue
 moscow = timezone(timedelta(hours=3))
 
 
-def shift_time(time, delta):
+def shift_time(time, delta: timedelta):
     """Manually advance or delay time by delta"""
     time = datetime(2000, 1, 1, int(time[:2]), int(time[3:]))
     time += delta
@@ -44,7 +45,7 @@ def shift_time(time, delta):
     return f"{time.hour:02}:{time.minute:02}"
 
 
-def get_month_times():
+def get_month_times() -> list[list[str]]:
     """Fetches the table of prayer times for the current month from halalguide website"""
     url = "https://en.halalguide.me/innopolis/namaz-time"
     res = requests.get(url, verify=False)
@@ -112,8 +113,52 @@ def send_tomorrows_times(update: Update, context: CallbackContext):
     prayers = [f"*{name}*: {time[tomorrow]}" for name, time in zip(prayer_names, times)]
     prayers_list = '\n'.join(prayers)
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text=f"Today's prayer times:\n{prayers_list}",
+                             text=f"Tomorrow's prayer times:\n{prayers_list}",
                              parse_mode=ParseMode.MARKDOWN_V2)
+
+def send_next_prayer(update: Update, context: CallbackContext):
+    times = get_month_times()
+    now = datetime.now(moscow)
+    today = now.day
+    with_time = lambda p_time, day=today: now.replace(day=day, hour=int(p_time[:2]), minute=int(p_time[3:]))
+    prayer_times = [with_time(time[today - 1]) for time in times]
+    _, days_in_month = monthrange(now.year, now.month)
+    tomorrow = now.day + 1
+    if tomorrow < days_in_month + 1:
+        prayer_times += [with_time(time[tomorrow - 1], tomorrow) for time in times]
+
+    requested_prayer = None
+    command = update.effective_message.text.split(' ', 1)
+    if len(command) == 2:
+        requested_prayer = command[1]
+        if requested_prayer not in prayer_names:
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                    text="Unkown value for prayer time.\n"
+                                        f"Available values are: {', '.join(prayer_names)}",
+                                    parse_mode=ParseMode.MARKDOWN_V2)
+            return
+
+    prayer_time = None
+    if requested_prayer is None:
+        prayer_time = next((p_time for p_time in prayer_times if p_time > now.time()), None)
+        if prayer_time is not None:
+            requested_prayer = prayer_names[prayer_times.index(prayer_time) % len(prayer_times)]
+    else:
+        prayer_idx = prayer_names.index(requested_prayer)
+        if prayer_idx + 1 < len(prayer_times):
+            prayer_time = prayer_times[prayer_idx + 1]
+
+    if prayer_time is None:
+        requested_prayer = 'prayer' if requested_prayer is None else requested_prayer
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                text=f"Sorry, cannot find the next {requested_prayer} time.\n"
+                                      "Cannot cross the month boundary (yet).",
+                                parse_mode=ParseMode.MARKDOWN_V2)
+        return
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                            text=f"The next {requested_prayer} in {precisedelta(prayer_time - now)}"
+                                 f" (at {prayer_time.strftime('%H:%M')})",
+                            parse_mode=ParseMode.MARKDOWN_V2)
 
 def start(update: Update, context: CallbackContext):
     new_id = update.effective_chat.id
