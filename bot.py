@@ -4,18 +4,19 @@ reference:
 """
 import os
 import logging
+from datetime import datetime, time, timedelta, timezone
+
 from telegram import Update, ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from dotenv import load_dotenv
-from datetime import datetime, time, timedelta, timezone
-from dbhelper import DBHelper
-
 import requests
 from bs4 import BeautifulSoup
 import numpy as np
 
-load_dotenv()
+from dbhelper import DBHelper
 
+
+load_dotenv()
 
 prayer_names = ['Fajr', 'Sunrise' , 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
