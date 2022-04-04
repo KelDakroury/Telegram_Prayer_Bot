@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from datetime import datetime, time, timedelta, timezone
 from calendar import monthrange
 from dbhelper import DBHelper
+from time import sleep
 
 
 load_dotenv()
@@ -138,6 +139,7 @@ for user in users:
     job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': user.id,
     })
+    sleep(2.5)
     job.run(dispatcher) # Run just once (for today)
 
 if 'ON_HEROKU' in os.environ:
