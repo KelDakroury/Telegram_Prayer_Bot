@@ -43,18 +43,26 @@ dispatcher = updater.dispatcher
 j = updater.job_queue
 
 moscow = timezone(timedelta(hours=3))
+now = datetime.now(moscow)
+sheet = worksheet.worksheet(now.strftime('%B %Y'))
+days = monthrange(now.year, now.month)[1]
+columns = ['C', 'E' ,'F', 'H', 'J', 'K']
+ranges = [f'{c}4:{c}{4+days-1}' for c in columns]
+prayers = [
+    [cell[0] for cell in row]
+    for row in sheet.batch_get(ranges)
+]
 
 def get_month_times():
     '''Fetches today's prayer times and returns them as a list of 5 elements.'''
-    now =  datetime.now(moscow)
-    sheet = worksheet.worksheet(now.strftime('%B %Y'))
-    days = monthrange(now.year, now.month)[1]
-    columns = ['C', 'E' ,'F', 'H', 'J', 'K']
-    ranges = [f'{c}4:{c}{4+days-1}' for c in columns]
-    prayers = [
-        [cell[0] for cell in row]
-        for row in sheet.batch_get(ranges)
-    ]
+    # now = datetime.now(moscow)
+    # days = monthrange(now.year, now.month)[1]
+    # columns = ['C', 'E' ,'F', 'H', 'J', 'K']
+    # ranges = [f'{c}4:{c}{4+days-1}' for c in columns]
+    # prayers = [
+    #     [cell[0] for cell in row]
+    #     for row in sheet.batch_get(ranges)
+    # ]
     return prayers
 
 
@@ -139,7 +147,7 @@ for user in users:
     job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': user.id,
     })
-    sleep(2.5)
+    # sleep(2.5)
     job.run(dispatcher) # Run just once (for today)
 
 if 'ON_HEROKU' in os.environ:
