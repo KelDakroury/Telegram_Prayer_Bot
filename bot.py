@@ -17,10 +17,9 @@ from humanize import precisedelta
 
 from dbhelper import DBHelper
 
-
 load_dotenv()
 
-prayer_names = ['Fajr', 'Sunrise' , 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+prayer_names = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
 # Preparing for the database to store the  userids
 db = DBHelper()
@@ -57,7 +56,7 @@ def get_month_times() -> list[list[str]]:
     for row in table.find_all("tr")[1:]:
         tmp = [tr.get_text() for tr in row.find_all("td")][3:]
         tmp[0] = shift_time(tmp[0], timedelta(minutes=-2))  # earlier fajr
-        tmp[4] = shift_time(tmp[4], timedelta(minutes=2))   # later maghrib
+        tmp[4] = shift_time(tmp[4], timedelta(minutes=2))  # later maghrib
         prayers.append(tmp)
 
     return np.array(prayers).T.tolist()
@@ -90,6 +89,7 @@ def register_todays_prayers(context: CallbackContext):
         })
         logging.info(f'Registered callback for {name} for {uid} registered at {timestamp}')
 
+
 def send_todays_times(update: Update, context: CallbackContext):
     times = get_month_times()
     today = datetime.now(moscow).day - 1
@@ -99,6 +99,7 @@ def send_todays_times(update: Update, context: CallbackContext):
                              text=f"Today's prayer times:\n{prayers_list}",
                              parse_mode=ParseMode.MARKDOWN_V2)
 
+
 def send_tomorrows_times(update: Update, context: CallbackContext):
     times = get_month_times()
     now = datetime.now(moscow)
@@ -106,15 +107,16 @@ def send_tomorrows_times(update: Update, context: CallbackContext):
     tomorrow = now.day
     if tomorrow >= days_in_month:
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                text="Sorry, this feature doesn't work"
-                                     " on the last day of the month yet :(",
-                                parse_mode=ParseMode.MARKDOWN_V2)
+                                 text="Sorry, this feature doesn't work"
+                                      " on the last day of the month yet :(",
+                                 parse_mode=ParseMode.MARKDOWN_V2)
         return
     prayers = [f"*{name}*: {time[tomorrow]}" for name, time in zip(prayer_names, times)]
     prayers_list = '\n'.join(prayers)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=f"Tomorrow's prayer times:\n{prayers_list}",
                              parse_mode=ParseMode.MARKDOWN_V2)
+
 
 def send_next_prayer(update: Update, context: CallbackContext):
     times = get_month_times()
@@ -133,9 +135,9 @@ def send_next_prayer(update: Update, context: CallbackContext):
         requested_prayer = command[1]
         if requested_prayer not in prayer_names:
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                    text="Unkown value for prayer time\n"
-                                        f"Available values are: {', '.join(prayer_names)}",
-                                    parse_mode=ParseMode.MARKDOWN_V2)
+                                     text="Unkown value for prayer time\n"
+                                          f"Available values are: {', '.join(prayer_names)}",
+                                     parse_mode=ParseMode.MARKDOWN_V2)
             return
 
     prayer_time = None
@@ -151,14 +153,15 @@ def send_next_prayer(update: Update, context: CallbackContext):
     if prayer_time is None:
         requested_prayer = 'prayer' if requested_prayer is None else requested_prayer
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                text=f"Sorry, cannot find the next {requested_prayer} time\n"
+                                 text=f"Sorry, cannot find the next {requested_prayer} time\n"
                                       "Cannot cross the month boundary (yet)",
-                                parse_mode=ParseMode.MARKDOWN_V2)
+                                 parse_mode=ParseMode.MARKDOWN_V2)
         return
     context.bot.send_message(chat_id=update.effective_chat.id,
-                            text=f"The next {requested_prayer} is in {precisedelta(prayer_time - now)}"
-                                 f" \\(at {prayer_time.strftime('%H:%M')}\\)",
-                            parse_mode=ParseMode.MARKDOWN_V2)
+                             text=f"The next {requested_prayer} is in {precisedelta(prayer_time - now)}"
+                                  f" \\(at {prayer_time.strftime('%H:%M')}\\)",
+                             parse_mode=ParseMode.MARKDOWN_V2)
+
 
 def start(update: Update, context: CallbackContext):
     new_id = update.effective_chat.id
@@ -174,11 +177,18 @@ def start(update: Update, context: CallbackContext):
     job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': new_id,
     })
-    job.run(dispatcher) # Run just once (for today)
+    job.run(dispatcher)  # Run just once (for today)
     context.bot.send_message(chat_id=new_id,
                              text="I will send you a reminder everyday on the prayer times of that day.\n"
-                                "Send /stop to stop reminding, /today to get just today's prayer times, "
-                                "and /start to start again.""")
+                                  "Send /stop to stop reminding, /today to get just today's prayer times, "
+                                  "and /start to start again.""")
+
+
+def broadcast(update: Update, context: CallbackContext):
+    if update.effective_chat.id == 782144399:
+        print(f"Sending {' '.join(context.args)} to user {context.job.context['chat_id']}")
+        # context.bot.send_message(chat_id=context.job.context['chat_id'], text=' '.join(context.args))
+
 
 def stop(update: Update, context: CallbackContext):
     uid = update.effective_chat.id
@@ -203,6 +213,9 @@ dispatcher.add_handler(tomorrow_handler)
 next_handler = CommandHandler('next', send_next_prayer)
 dispatcher.add_handler(next_handler)
 
+broadcast_handler = CommandHandler('broadcast', broadcast)
+dispatcher.add_handler(broadcast_handler)
+
 stop_handler = CommandHandler('stop', stop)
 dispatcher.add_handler(stop_handler)
 
@@ -211,14 +224,14 @@ for user in users:
     job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': user.id,
     })
-    job.run(dispatcher) # Run just once (for today)
+    job.run(dispatcher)  # Run just once (for today)
 
 if 'ON_HEROKU' in os.environ:
     # set the port number to listen in for the webhook.
     port = int(os.environ.get('PORT', 5000))
     updater.start_webhook(listen="0.0.0.0",
-                            port=port,
-                            url_path=TOKEN)
+                          port=port,
+                          url_path=TOKEN)
     updater.bot.setWebhook('https://innoprayerbot.herokuapp.com/' + TOKEN)
 else:
     updater.start_polling()
