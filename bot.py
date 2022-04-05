@@ -122,6 +122,13 @@ def start(update: Update, context: CallbackContext):
                                 "Send /stop to stop reminding, /today to get just today's prayer times, "
                                 "and /start to start again.""")
 
+
+def broadcast(update: Update, context: CallbackContext):
+    if update.effective_chat.id == 782144399:
+        logging.info(f"Sending {' '.join(context.args)} to user {context.job.context['chat_id']}")
+        # context.bot.send_message(chat_id=context.job.context['chat_id'], text=' '.join(context.args))
+
+
 def stop(update: Update, context: CallbackContext):
     uid = update.effective_chat.id
     user = db.get_user(uid)
@@ -138,6 +145,9 @@ dispatcher.add_handler(start_handler)
 
 today_handler = CommandHandler('today', send_todays_times)
 dispatcher.add_handler(today_handler)
+
+broadcast_handler = CommandHandler('broadcast', broadcast)
+dispatcher.add_handler(broadcast_handler)
 
 stop_handler = CommandHandler('stop', stop)
 dispatcher.add_handler(stop_handler)
