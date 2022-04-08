@@ -185,8 +185,10 @@ def broadcast(update: Update, context: CallbackContext):
         users = db.list_users()
         for user in users:
             # logging.info(f"Sending {' '.join(context.args)} to user {user.id}")
-            context.bot.send_message(chat_id=user.id, text=' '.join(context.args))
-
+            try:
+                context.bot.send_message(chat_id=user.id, text=' '.join(context.args))
+            except:
+                continue
 
 def stop(update: Update, context: CallbackContext):
     uid = update.effective_chat.id
