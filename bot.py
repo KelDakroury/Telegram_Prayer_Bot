@@ -44,22 +44,21 @@ def shift_time(time, delta: timedelta):
     time = time.time()
     return f"{time.hour:02}:{time.minute:02}"
 
+url = "https://en.halalguide.me/innopolis/namaz-time"
+res = requests.get(url, verify=False)
+html = res.content
+soup = BeautifulSoup(html, 'html.parser')
+table = soup.find('table')
+
+prayers = []
+for row in table.find_all("tr")[1:]:
+    tmp = [tr.get_text() for tr in row.find_all("td")][3:]
+    tmp[0] = shift_time(tmp[0], timedelta(minutes=-2))  # earlier fajr
+    tmp[4] = shift_time(tmp[4], timedelta(minutes=2))   # later maghrib
+    prayers.append(tmp)
 
 def get_month_times() -> list[list[str]]:
     """Fetches the table of prayer times for the current month from halalguide website"""
-    url = "https://en.halalguide.me/innopolis/namaz-time"
-    res = requests.get(url, verify=False)
-    html = res.content
-    soup = BeautifulSoup(html, 'html.parser')
-    table = soup.find('table')
-
-    prayers = []
-    for row in table.find_all("tr")[1:]:
-        tmp = [tr.get_text() for tr in row.find_all("td")][3:]
-        tmp[0] = shift_time(tmp[0], timedelta(minutes=-2))  # earlier fajr
-        tmp[4] = shift_time(tmp[4], timedelta(minutes=2))   # later maghrib
-        prayers.append(tmp)
-
     return np.array(prayers).T.tolist()
 
 
