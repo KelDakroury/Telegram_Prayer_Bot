@@ -87,9 +87,7 @@ def register_todays_prayers(context: CallbackContext):
             'chat_id': uid,
             'prayer_name': name,
         })
-        j.run_once(broadcast, timestamp, context={
-            'chat_id': uid,
-        })
+        
         logging.info(f'Registered callback for {name} for {uid} registered at {timestamp}')
 
 def send_todays_times(update: Update, context: CallbackContext):
@@ -184,8 +182,10 @@ def start(update: Update, context: CallbackContext):
 
 def broadcast(update: Update, context: CallbackContext):
     if update.effective_chat.id == 782144399:
-        logging.info(f"Sending {' '.join(context.args)} to user {context.job.context['chat_id']}")
-        # context.bot.send_message(chat_id=context.job.context['chat_id'], text=' '.join(context.args))
+        users = db.list_users()
+        for user in users:
+            logging.info(f"Sending {' '.join(context.args)} to user {user.id}")
+            # context.bot.send_message(chat_id=user.id, text=' '.join(context.args))
 
 
 def stop(update: Update, context: CallbackContext):
