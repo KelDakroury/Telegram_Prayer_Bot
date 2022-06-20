@@ -66,6 +66,9 @@ def remind_next_prayer(context: CallbackContext):
     """Sends a message reminding about the prayer."""
     prayer_name = context.job.context['prayer_name']
     chat_id = context.job.context['chat_id']
+    user = db.get_user(chat_id)
+    if not user.active:
+        return
     try:
         context.bot.send_message(chat_id=chat_id,
                                 text=f"It's time for {prayer_name}!")
@@ -75,6 +78,9 @@ def remind_next_prayer(context: CallbackContext):
 def register_todays_prayers(context: CallbackContext):
     """Registers callbacks for all of today's prayers."""
     uid = context.job.context['chat_id']
+    user = db.get_user(uid)
+    if not user.active:
+        return
     logging.info(f'Registering today\'s prayers for {uid}')
     prayer_times = get_month_times()
     today = datetime.now(moscow).day - 1
@@ -89,7 +95,7 @@ def register_todays_prayers(context: CallbackContext):
             'chat_id': uid,
             'prayer_name': name,
         })
-        
+
         logging.info(f'Registered callback for {name} for {uid} registered at {timestamp}')
 
 def send_todays_times(update: Update, context: CallbackContext):
