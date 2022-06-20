@@ -201,13 +201,10 @@ def broadcast(update: Update, context: CallbackContext):
 
 def stop(update: Update, context: CallbackContext):
     uid = update.effective_chat.id
-    user = db.get_user(uid)
-
-    # for job in j.jobs():
-    #     print(job)
+    db.set_active(uid, False)
 
     context.bot.send_message(chat_id=uid,
-                             text="Sorry. Not yet implemented :(")
+                             text="Reminders stopped. To reactivate, send /start again.")
 
 
 start_handler = CommandHandler('start', start)
