@@ -172,12 +172,14 @@ def start(update: Update, context: CallbackContext):
     new_id = update.effective_chat.id
     context.chat_data['id'] = new_id
     user = db.get_user(new_id)
-    if user is not None and user.active:
+    if user is None:
+        user = db.add_user(new_id)
+    elif user.active:
         context.bot.send_message(chat_id=new_id,
                                  text="The bot is already activated.""")
         return
-
-    db.add_user(new_id)
+    elif not user.active:
+        db.set_active(new_id, True)
 
     job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': new_id,
@@ -185,8 +187,7 @@ def start(update: Update, context: CallbackContext):
     job.run(dispatcher) # Run just once (for today)
     context.bot.send_message(chat_id=new_id,
                              text="I will send you a reminder everyday on the prayer times of that day.\n"
-                                "Send /stop to stop reminding, /today to get just today's prayer times, "
-                                "and /start to start again.""")
+                                "Send /stop to stop reminding or /today to get just today's prayer times.")
 
 def broadcast(update: Update, context: CallbackContext):
     if update.effective_chat.id == 782144399:
