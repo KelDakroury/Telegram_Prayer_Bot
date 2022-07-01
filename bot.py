@@ -66,6 +66,9 @@ def remind_next_prayer(context: CallbackContext):
     """Sends a message reminding about the prayer."""
     prayer_name = context.job.context['prayer_name']
     chat_id = context.job.context['chat_id']
+    user = db.get_user(chat_id)
+    if not user.active:
+        return
     try:
         context.bot.send_message(chat_id=chat_id,
                                 text=f"It's time for {prayer_name}!")
@@ -75,6 +78,9 @@ def remind_next_prayer(context: CallbackContext):
 def register_todays_prayers(context: CallbackContext):
     """Registers callbacks for all of today's prayers."""
     uid = context.job.context['chat_id']
+    user = db.get_user(uid)
+    if not user.active:
+        return
     logging.info(f'Registering today\'s prayers for {uid}')
     prayer_times = get_month_times()
     today = datetime.now(moscow).day - 1
@@ -89,7 +95,7 @@ def register_todays_prayers(context: CallbackContext):
             'chat_id': uid,
             'prayer_name': name,
         })
-        
+
         logging.info(f'Registered callback for {name} for {uid} registered at {timestamp}')
 
 def send_todays_times(update: Update, context: CallbackContext):
@@ -166,12 +172,14 @@ def start(update: Update, context: CallbackContext):
     new_id = update.effective_chat.id
     context.chat_data['id'] = new_id
     user = db.get_user(new_id)
-    if user is not None and user.active:
+    if user is None:
+        user = db.add_user(new_id)
+    elif user.active:
         context.bot.send_message(chat_id=new_id,
                                  text="The bot is already activated.""")
         return
-
-    db.add_user(new_id)
+    elif not user.active:
+        db.set_active(new_id, True)
 
     job = j.run_daily(register_todays_prayers, time(0, 0, tzinfo=moscow), context={
         'chat_id': new_id,
@@ -179,8 +187,7 @@ def start(update: Update, context: CallbackContext):
     job.run(dispatcher) # Run just once (for today)
     context.bot.send_message(chat_id=new_id,
                              text="I will send you a reminder everyday on the prayer times of that day.\n"
-                                "Send /stop to stop reminding, /today to get just today's prayer times, "
-                                "and /start to start again.""")
+                                "Send /stop to stop reminding or /today to get just today's prayer times.")
 
 def broadcast(update: Update, context: CallbackContext):
     if update.effective_chat.id == 782144399:
@@ -194,13 +201,10 @@ def broadcast(update: Update, context: CallbackContext):
 
 def stop(update: Update, context: CallbackContext):
     uid = update.effective_chat.id
-    user = db.get_user(uid)
-
-    # for job in j.jobs():
-    #     print(job)
+    db.set_active(uid, False)
 
     context.bot.send_message(chat_id=uid,
-                             text="Sorry. Not yet implemented :(")
+                             text="Reminders stopped. To reactivate, send /start again.")
 
 
 start_handler = CommandHandler('start', start)
