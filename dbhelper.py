@@ -64,7 +64,6 @@ class DBHelper:
         """
         args = (active, user_id)
         cur.execute(stmt, args)
-        user = cur.fetchone()
         cur.close()
 
     def delete_user(self, user_id: str):
