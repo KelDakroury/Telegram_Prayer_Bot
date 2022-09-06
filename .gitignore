@@ -1,9 +1,7 @@
-.env
 venv/
-client_secret
-innoprayer-dd45c05bd5a4
-.idea
-*.sqlite
-*.pyc
-*.DS_Store
-__pycache__
+.idea/
+__pycache__/
+migration/
+.env
+InnoPrayerBot.session
+InnoPrayerBot.session-journal
