@@ -23,9 +23,8 @@ ADMIN_UID=
 ```
 
 ```bash
-git clone https://github.com/KelDakroury/Telegram_Prayer_Bot
 python -m venv venv
-sourve venv/bin/activate
+source venv/bin/activate
 mv .env.sample .env
 python main.py
 ```
